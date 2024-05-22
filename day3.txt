@@ -99,6 +99,7 @@ config t
 ip route 192.168.1.128 255.255.255.224 10.2.1.2
 ip route 192.168.1.129 255.255.255.255 10.2.1.1
 do sh ip route static
+ip route 10.2.2.0 255.255.255.0 10.2.1.2 1
 Pano mag static Route sa PC:
 cmd
 route  add 10.m.0.0 mask 255.255.0.0 10.m.1.4 -p
@@ -214,7 +215,7 @@ sh ip ospf database
 
 Task3: Eigrp and Ospf Redistribution:
 R4: sikat: Eigrp and OSPF world:
-config T
+config t
 router eigrp 100
 redistribute ospf 1 metric 10000 100 255 1 1500
  exit
@@ -227,6 +228,7 @@ R1 BGP:
 config t
 router bgp 1
  bgp log-neighbor-changes
+ bgp router-id 1.1.1.1
  neighbor 208.8.8.4 remote-as 45
  neighbor 207.7.7.2 remote-as 2
  neighbor 209.9.9.3 remote-as 3
