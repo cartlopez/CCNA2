@@ -5,19 +5,43 @@ r1 to r4: ospf 1:
 config t
  no router ospf 1
  do sh ip protocols
-
-R4
+!#Give IP address/Primary and Secondary Default GW to Server 1 and 2
+S1:
+config t
+int e1/0
+ no shut
+ ip add 192.168.1.133 255.255.255.224
+ do bp
+ ip route 0.0.0.0 0.0.0.0 192.168.1.129 1
+ ip route 0.0.0.0 0.0.0.0 192.168.1.130 2
+ do sh ip route static
+S2:
+config t
+int e1/0
+ no shut
+ ip add 10.2.2.133 255.255.255.0
+ do bp
+ ip route 0.0.0.0 0.0.0.0 10.2.2.2 1
+ ip route 0.0.0.0 0.0.0.0 10.2.2.1 2
+ do sh ip route static
+R4:
 config t
  no router eigrp 100
  Task1: LoadBalacing DHCP Server:
- D1:
-CONFIG T
+D1:
+config t
 ip dhcp excluded-add 10.2.1.1 10.2.1.99
 ip dhcp excluded-add 10.2.1.200 10.2.1.254
 !
 ip dhcp pool vlan10
   network 10.2.1.0 255.255.255.0
   default-router 10.2.1.254
+!#Ipasok D1 port e1/0 sa VLAN 200
+D1# config t
+     int e1/0
+     switchport mode access
+     switchport access vlan 200
+     do show vlan brief
 !
 D2:
 CONFIG T
@@ -28,6 +52,12 @@ ip dhcp pool vlan10
   network 10.2.1.0 255.255.255.0
   default-router 10.2.1.254
 !
+!#Ipasok D2 port e1/0 sa VLAN 20
+D2# config t
+     int e1/0
+     switchport mode access
+     switchport access vlan 20
+     do show vlan brief
 A1: lipat vlan from v1 to v10
 config t
 int e0/0
@@ -38,7 +68,6 @@ config t
 ip route 0.0.0.0 0.0.0.0 192.168.1.129 1
 ip route 0.0.0.0 0.0.0.0 192.168.1.130 2
 do sh ip route static
-
 A2:
 config t
 int e1/0
@@ -49,8 +78,7 @@ config t
 ip route 0.0.0.0 0.0.0.0 192.168.1.130 1
 ip route 0.0.0.0 0.0.0.0 192.168.1.129 2
 do sh ip route static
-
-p1:
+P1:
 config t
 int e0/0
  ip add 10.2.1.101 255.255.255.0
@@ -60,7 +88,7 @@ config t
 ip route 192.168.1.128 255.255.255.224 10.2.1.1 1
 ip route 192.168.1.130 255.255.255.255 10.2.1.2
 do sh ip route static
-
+ip route 10.2.2.0 255.255.255.0 10.2.1.2 1
 p2:
 config t
 int e1/0
@@ -70,7 +98,7 @@ P2: Creating STATIC Routes for VLAN 200
 config t
 ip route 192.168.1.128 255.255.255.224 10.2.1.2
 ip route 192.168.1.129 255.255.255.255 10.2.1.1
-
+do sh ip route static
 Pano mag static Route sa PC:
 cmd
 route  add 10.m.0.0 mask 255.255.0.0 10.m.1.4 -p
@@ -86,7 +114,7 @@ config T
 ip route 0.0.0.0  0.0.0.0 10.2.1.2
 do sh ip route static
 
-D1:
+D1: EIGRP
 config t
 router eigrp 100
  no auto-summary
@@ -108,7 +136,7 @@ conf t
 		end
 
 
-D2:
+D2: EIGRP
 config t
 router eigrp 100
  no auto-summary
